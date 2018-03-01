@@ -1,0 +1,3 @@
+{
+    "postgres_connect" : "host=localhost user=token password='erc20' port=5432	sslmode=disable dbname=paxfulDB connect_timeout=10"
+}
