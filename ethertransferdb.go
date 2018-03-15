@@ -4,10 +4,9 @@ import (
 	_ "github.com/lib/pq" // DB selection
 )
 
-// TokenTransfer = the data for a token transfer :-)
-type TokenTransfer struct {
+// EtherTransfer = the data for a token transfer :-)
+type EtherTransfer struct {
 	TransferID  uint64
-	TokenID     uint64
 	BlockNumber uint64
 	BlockHash   string
 	Index       uint
@@ -18,25 +17,25 @@ type TokenTransfer struct {
 }
 
 // Add this token to the database
-func (tt *TokenTransfer) Add() (err error) {
-	statement := `insert into tokentransfers (tokenid,blocknumber,blockhash,index,txhash,source,dest,amount) values ($1,$2,$3,$4,$5,$6,$7,$8) returning transferid`
+func (tt *EtherTransfer) Add() (err error) {
+	statement := `insert into ethertransfers (blocknumber,blockhash,index,txhash,source,dest,amount) values ($1,$2,$3,$4,$5,$6,$7) returning transferid`
 	stmt, err := db.Prepare(statement)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
-	err = stmt.QueryRow(tt.TokenID, tt.BlockNumber, tt.BlockHash, tt.Index, tt.TxHash, tt.Source, tt.Dest, tt.Amount).Scan(&tt.TransferID)
+	err = stmt.QueryRow(tt.BlockNumber, tt.BlockHash, tt.Index, tt.TxHash, tt.Source, tt.Dest, tt.Amount).Scan(&tt.TransferID)
 	return
 }
 
 // Find transfers that match tokenID
-func (tt *TokenTransfer) Find() (transfers []TokenTransfer, err error) {
-	statement := `select transferid,tokenid,blocknumber,blockhash,index,txhash,source,dest,amount from tokentransfers where tokenid=$1`
+func (tt *EtherTransfer) Find() (transfers []TokenTransfer, err error) {
+	statement := `select transferid,blocknumber,blockhash,index,txhash,source,dest,amount from ethertransfers`
 	stmt, err := db.Prepare(statement)
 	if err != nil {
 		return
 	}
-	rows, err := stmt.Query(tt.TokenID)
+	rows, err := stmt.Query()
 	if err != nil {
 		return
 	}

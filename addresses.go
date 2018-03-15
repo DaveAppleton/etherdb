@@ -19,7 +19,7 @@ func (a *Account) Add() (err error) {
 	return
 }
 
-// FindAll tokens that match either on name or address
+// FindAll accounts that match either on name or address
 func (a *Account) FindAll() (accounts []Account, err error) {
 	statement := `select id, address,userid from addresses where address=$1 or user=$2`
 	stmt, err := db.Prepare(statement)
@@ -43,7 +43,7 @@ func (a *Account) FindAll() (accounts []Account, err error) {
 
 // GetAllAccountsAndMaxFrom max as a starting value, from the database
 func GetAllAccountsAndMaxFrom(max uint64) (accounts []Account, newMax uint64, err error) {
-	statement := `select id , address,userid from addresses order by user where id >= $1`
+	statement := `select id , address,userid from addresses where id >= $1 order by user`
 	stmt, err := db.Prepare(statement)
 	if err != nil {
 		return

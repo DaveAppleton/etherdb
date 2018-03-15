@@ -66,7 +66,8 @@ func (t *Token) FindAll() (tokens []Token, err error) {
 
 // GetAllTokensAndMaxFrom max as a starting value, from the database
 func GetAllTokensAndMaxFrom(max uint64) (tokens []Token, newMax uint64, err error) {
-	statement := `select tkn, address,name,symbol,decimals from tokens order by name where txn > $1`
+	newMax = max
+	statement := `select tkn, address,name,symbol,decimals from tokens where tkn > $1 order by name`
 	stmt, err := db.Prepare(statement)
 	if err != nil {
 		return
@@ -82,8 +83,8 @@ func GetAllTokensAndMaxFrom(max uint64) (tokens []Token, newMax uint64, err erro
 			return
 		}
 		tokens = append(tokens, tkn)
-		if tkn.TokenID > max {
-			max = tkn.TokenID
+		if tkn.TokenID > newMax {
+			newMax = tkn.TokenID
 		}
 	}
 	return
