@@ -29,6 +29,19 @@ func (tt *TokenTransfer) Add() (err error) {
 	return
 }
 
+// AddIfNotFound only adds if the txhash is not found
+func (tt *TokenTransfer) AddIfNotFound() (err error) {
+	statement := `insert into tokentransfers (txhash,tokenid,blocknumber,blockhash,index,source,dest,amount) 
+					values ($1,$2,$3,$4,$5,$6,$7,$8) on conflict do nothing`
+	stmt, err := db.Prepare(statement)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(tt.TxHash, tt.TokenID, tt.BlockNumber, tt.BlockHash, tt.Index, tt.Source, tt.Dest, tt.Amount)
+	return
+}
+
 // Find transfers that match tokenID
 func (tt *TokenTransfer) Find() (transfers []TokenTransfer, err error) {
 	statement := `select transferid,tokenid,blocknumber,blockhash,index,txhash,source,dest,amount from tokentransfers where tokenid=$1`

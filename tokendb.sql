@@ -19,7 +19,7 @@ create table tokentransfers (
 	blocknumber int,
 	blockhash varchar(70)  not null,
 	index int,
-	txhash varchar(70) not null,
+	txhash varchar(70) unique not null,
     source varchar(44) not null,
     dest varchar(44) not null,
     Amount varchar(44) not null
@@ -43,7 +43,7 @@ create table ethertransfers (
     blocknumber int,
     blockhash varchar(70)  not null,
     index int,
-    txhash  varchar(70) not null,
+    txhash  varchar(70) unique not null,
     source varchar(44) not null,
     dest varchar(44) not null,
     amount  varchar(44) not null
