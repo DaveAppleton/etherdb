@@ -19,6 +19,7 @@ type Token struct {
 
 var db *sql.DB
 
+// InitDB has to be called before any activity but needs viper
 func InitDB(connectString string) {
 	var err error
 	db, err = sql.Open("postgres", connectString) //
