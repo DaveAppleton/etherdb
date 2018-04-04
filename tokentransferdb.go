@@ -64,3 +64,18 @@ func (tt *TokenTransfer) Find() (transfers []TokenTransfer, err error) {
 	}
 	return
 }
+
+// MaxBlock for a specified token
+func (tt *TokenTransfer) MaxBlock() (max int64, err error) {
+	statement := `select max(blocknumber) from tokentransfers where tokenid=$1`
+	stmt, err := db.Prepare(statement)
+	if err != nil {
+		return
+	}
+	err = stmt.QueryRow(tt.TokenID).Scan(&max)
+	if err != nil {
+		max = 0
+		err = nil
+	}
+	return
+}
