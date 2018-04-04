@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-// queueSend(tx, user, destination, valueStr, gasLimit, gasPrice, data)
+// QueueSend (tx, user, destination, valueStr, gasLimit, gasPrice, data)
 //    Entry added to TX Queue, which is retried every 10 seconds
 //    must wait for 1 of
 //    * Tx Time out - how do we report it?
@@ -19,6 +19,7 @@ func QueueSend(tx common.Hash, user string, destination string, valueStr string,
 	db.Exec(queueSQL, tx.Hex(), user, destination, valueStr, gasLimit, gasPrice, data)
 }
 
+// BumpRetry to indicate the number of times this has been retried
 func BumpRetry(id *big.Int) {
 	sql := "update queueSend set retryCount=retryCoun+1 where id=$1"
 	_, err := db.Exec(sql, id)
@@ -32,6 +33,7 @@ func LogSecond(id *big.Int, user string, dest string, val string, tx common.Hash
 	db.Exec(sql, id, user, dest, val, tx.Hex())
 }
 
+// SetFail message to show why not sent yet
 func SetFail(id *big.Int, errIn error) {
 	sql := "update queueSend set status = 'fail' and error='$1' where id=$2"
 	_, err := db.Exec(sql, errIn.Error(), id)
