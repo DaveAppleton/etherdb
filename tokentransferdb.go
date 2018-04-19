@@ -1,6 +1,8 @@
 package etherdb
 
 import (
+	"database/sql"
+
 	_ "github.com/lib/pq" // DB selection
 )
 
@@ -43,6 +45,18 @@ func (tt *TokenTransfer) AddIfNotFound() (err error) {
 	return
 }
 
+func getTransfers(rows *sql.Rows) (transfers []TokenTransfer, err error) {
+	var t TokenTransfer
+	for rows.Next() {
+		err = rows.Scan(&t.TransferID, &t.TokenID, &t.BlockNumber, &t.BlockHash, &t.Index, &t.TxHash, &t.Source, &t.Dest, &t.Amount, &t.Timestamp)
+		if err != nil {
+			return
+		}
+		transfers = append(transfers, t)
+	}
+	return
+}
+
 // Find transfers that match tokenID
 func (tt *TokenTransfer) Find() (transfers []TokenTransfer, err error) {
 	statement := `select transferid,tokenid,blocknumber,blockhash,index,txhash,source,dest,amount,timestamp from tokentransfers where tokenid=$1`
@@ -54,15 +68,44 @@ func (tt *TokenTransfer) Find() (transfers []TokenTransfer, err error) {
 	if err != nil {
 		return
 	}
-	var t TokenTransfer
-	for rows.Next() {
-		err = rows.Scan(&t.TransferID, &t.TokenID, &t.BlockNumber, &t.BlockHash, &t.Index, &t.TxHash, &t.Source, &t.Dest, &t.Amount, &t.Timestamp)
-		if err != nil {
-			return
-		}
-		transfers = append(transfers, t)
+	return getTransfers(rows)
+	// var t TokenTransfer
+	// for rows.Next() {
+	// 	err = rows.Scan(&t.TransferID, &t.TokenID, &t.BlockNumber, &t.BlockHash, &t.Index, &t.TxHash, &t.Source, &t.Dest, &t.Amount, &t.Timestamp)
+	// 	if err != nil {
+	// 		return
+	// 	}
+	// 	transfers = append(transfers, t)
+	// }
+	// return
+}
+
+// FindByAddress returns transfers of specific token to or from an address
+func (tt *TokenTransfer) FindByAddress(addr string) (transfers []TokenTransfer, err error) {
+	statement := `select transferid,tokenid,blocknumber,blockhash,index,txhash,source,dest,amount,timestamp from tokentransfers where tokenid=$1 and (source=$2 or dest=$2)`
+	stmt, err := db.Prepare(statement)
+	if err != nil {
+		return
 	}
-	return
+	rows, err := stmt.Query(tt.TokenID, addr)
+	if err != nil {
+		return
+	}
+	return getTransfers(rows)
+}
+
+// FindAllByAddress returns transfers of any token to or from an address
+func (tt *TokenTransfer) FindAllByAddress(addr string) (transfers []TokenTransfer, err error) {
+	statement := `select transferid,tokenid,blocknumber,blockhash,index,txhash,source,dest,amount,timestamp from tokentransfers where source=$1 or dest=$1`
+	stmt, err := db.Prepare(statement)
+	if err != nil {
+		return
+	}
+	rows, err := stmt.Query(addr)
+	if err != nil {
+		return
+	}
+	return getTransfers(rows)
 }
 
 // MaxBlock for a specified token
