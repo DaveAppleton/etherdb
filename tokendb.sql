@@ -10,6 +10,8 @@ create table tokens (
     decimals integer
 );
 
+create user token with password'erc20';
+
 grant select, insert, update on tokens to token;
 grant select,  update on tokens_tkn_seq to token;
 
