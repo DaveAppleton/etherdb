@@ -20,6 +20,22 @@ type TokenTransfer struct {
 	Amount      string
 }
 
+// ExtendedTokenTransfer adds info about actual transaction
+type ExtendedTokenTransfer struct {
+	TransferID  uint64
+	TokenID     uint64
+	BlockNumber uint64
+	BlockHash   string
+	Timestamp   uint64
+	Index       uint
+	TxHash      string
+	Source      string
+	Dest        string
+	Amount      string
+	Origin      string
+	Target      string
+}
+
 type NamedTokenTransfer struct {
 	TransferID    uint64
 	TokenID       uint64
@@ -46,6 +62,18 @@ func (tt *TokenTransfer) Add() (err error) {
 	}
 	defer stmt.Close()
 	err = stmt.QueryRow(tt.TokenID, tt.BlockNumber, tt.BlockHash, tt.Index, tt.TxHash, tt.Source, tt.Dest, tt.Amount, tt.Timestamp).Scan(&tt.TransferID)
+	return
+}
+
+// Add this token to the database
+func (tt *ExtendedTokenTransfer) Add() (err error) {
+	statement := `insert into tokentransfers (tokenid,blocknumber,blockhash,index,txhash,source,dest,amount,timestamp,origin,target) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) returning transferid`
+	stmt, err := db.Prepare(statement)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow(tt.TokenID, tt.BlockNumber, tt.BlockHash, tt.Index, tt.TxHash, tt.Source, tt.Dest, tt.Amount, tt.Timestamp, tt.Origin, tt.Target).Scan(&tt.TransferID)
 	return
 }
 
